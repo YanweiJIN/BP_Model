@@ -1,5 +1,5 @@
 #### Random Forest Model
-#### Please keep a look on the Features Data before use it
+#### Please take a look on the Features Data before use it
 
 
 import numpy as np
