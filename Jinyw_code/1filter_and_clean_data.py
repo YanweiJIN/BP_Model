@@ -129,26 +129,32 @@ for R_peak_number in range(len(ecgpeaks)-1):
             times_recorder.append(sum_beats)
 
 
-#### Show cleaned data:
+'''
+#### Show  original cleaned data:
 
 print('All beats: ', sum_beats, ', Reserved beats: ', len(times_recorder))
 display(cleaned_df)
 figcleaned = px.line(cleaned_df)
 figcleaned.show()
 
-#### Reset index and show:
-
+'''
+#### Reset indexs:
 cleaned_df = cleaned_df.reset_index()
+
+'''
+#### Show final cleaned data:
+
 display(cleaned_df)
 figcleaned = px.line(cleaned_df)
 figcleaned.show()
 
+'''
+
 
 #### Save acceptable cleaned data to Part_Cleaned_.cvs
+#### Warning!!!! NEVER FORGET to change the name of the csv!!!!!!!!!
 
-if len(times_recorder) >= 300:      # only more than 5-mins' data could be saved
-    #### Warning!!!! NEVER FORGET to change the name of the csv!!!!!!!!!
-    cleaned_df.to_csv('/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data/Part1_cleaned1.csv')
+cleaned_df.to_csv('/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data/Part1_cleaned1.csv')
 
 
 ################################################################################################################################################################################

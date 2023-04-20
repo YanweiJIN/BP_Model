@@ -68,4 +68,45 @@ for patient in range(len(data)):
 
 display(df)
 
+#### Open data:
+
+RMSE_SBP, RMSE_DBP, MAE_SBP, MAE_DBP, Abnormal_location= [], [], [], [], []
+
+for patient in range(10):
+    if len(data[patient]) > 999:
+        df = pd.DataFrame(data[patient], columns=(('PPG','BP', 'ECG'))) #选取前10000条数据
+        ecg_data = df['ECG']
+        ppg_data = df['PPG']
+        bp_data = df['BP']
+
+        #### Filter signals and ...
+
+        .
+        .
+        .
+        .
+        .
+        .
+
+        #### Calculate root mean squared error and mean absolute error for both SBP and DBP
+        rmse_sbp = metrics.mean_squared_error(y_test["SBP"], y_pred[:, 0])**0.5
+        rmse_dbp = metrics.mean_squared_error(y_test["DBP"], y_pred[:, 1])**0.5
+        mae_sbp = metrics.mean_absolute_error(y_test["SBP"], y_pred[:, 0])
+        mae_dbp = metrics.mean_absolute_error(y_test["DBP"], y_pred[:, 1])
+        
+        if rmse_sbp > 5 or rmse_dbp >5:
+            Abnormal_location.append(patient)
+
+        RMSE_SBP.append(rmse_sbp)
+        RMSE_DBP.append(rmse_dbp)
+        MAE_SBP.append(mae_sbp)
+        MAE_DBP.append(mae_dbp)
+
+print('RMSE_SBP: ', RMSE_SBP)
+print('RMSE_DBP: ', RMSE_DBP)
+print('MAE_SBP: ', MAE_SBP)
+print('MAE_DBP: ', MAE_DBP)
+print('Abnormal location: ', Abnormal_location)
+print('RMSE_SBP: ', mean(RMSE_SBP), 'RMSE_DBP', mean(RMSE_DBP), 'MAE_SBP: ', mean(MAE_SBP), 'MAE_DBP', mean(MAE_DBP))
+
 '''
