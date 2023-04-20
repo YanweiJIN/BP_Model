@@ -9,9 +9,10 @@
 ####        3: ECG signal, FS=125Hz; electrocardiogram from channel II
 
 
+################################################################################################################################################################################
 
 
-
+import sys
 import numpy as np
 import pandas as pd
 import h5py
@@ -32,39 +33,59 @@ from sklearn.preprocessing import StandardScaler
 import warnings
 
 
-################################################################################################################################################################################
-
-## Open data
-
-#### Input the data to process, and name the columns
-
-df = input 
-
-ppg_data = df['PPG']
-bp_data = df['BP']
-ecg_data = df['ECG']
 
 
 ################################################################################################################################################################################
 
 
-## Filter signals
 
-#### Define the sampling rate (e.g., 125 Hz)
+def clean_data(data, number):
+    df = pd.DataFrame(data, columns=(('PPG','BP','ECG')))
+    ppg_data = df['PPG']
+    bp_data = df['BP']
+    ecg_data = df['ECG']
 
-sampling_rate = 125
+    ## Filter signals
+    sampling_rate = 125
+    ppg_filtered = nk.signal_filter(ppg_data, lowcut=0.5, highcut=50, method='butterworth', order=2, sampling_rate=sampling_rate)
+    ecg_filtered = nk.signal_filter(ecg_data, lowcut=0.5, highcut=50, method='butterworth', order=2, sampling_rate=sampling_rate)
+    
+    filtered_df = df
+    filtered_df['PPG'], filtered_df['ECG'] = ppg_filtered, ecg_filtered
+    
 
-#### Filter PPG and ECG data
+    ## Clean data: make every beat only have one PPG/BP peak
+    #### Find ECG R-peaks
+    ecgpeaks, _ = signal.find_peaks(ecg_filtered, distance=sampling_rate//2.5)
 
-ppg_filtered = nk.signal_filter(ppg_data, lowcut=0.5, highcut=50, method='butterworth', order=2, sampling_rate=sampling_rate)
-ecg_filtered = nk.signal_filter(ecg_data, lowcut=0.5, highcut=50, method='butterworth', order=2, sampling_rate=sampling_rate)
+    #### Make sure onle one PPG peak and one BP peak between two adjacent ECG R-peaks
+    cleaned_df = pd.DataFrame()
+    sum_beats = 0
+    times_recorder = []
 
-filtered_df = df
-filtered_df['PPG'], filtered_df['ECG'] = ppg_filtered, ecg_filtered
+    for R_peak_number in range(len(ecgpeaks)-1):
+        sum_beats += 1
+        if ecg_filtered[ecgpeaks[R_peak_number]] > 0.4 and ecg_filtered[ecgpeaks[R_peak_number + 1]] > 0.4: # make sure the peaks are R-peak
+            onebeat_ppgpeak, _ = signal.find_peaks(ppg_filtered[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]], distance = sampling_rate//2.5)
+            onebeat_bppeak, _ = signal.find_peaks(bp_data[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]], distance = sampling_rate//2.5)
+            if len(onebeat_ppgpeak) == 1 and ppg_filtered[ecgpeaks[R_peak_number] + onebeat_ppgpeak] > 0 and len(onebeat_bppeak) == 1 : # make sure only one BP signal for one beat 
+                cleaned_df = pd.concat([cleaned_df, filtered_df[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]]])
+                times_recorder.append(sum_beats)                
+    
+    #### Reset indexs:
+    cleaned_df = cleaned_df.reset_index()
+    
+    return cleaned_df.to_csv(f'/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data/Part1_cleaned{number}.csv')
 
-'''
+    
+
+
+################################################################################################################################################################################
+
+
+'''  
+
 #### show the filtered PPG and ECG signals
-
 ppg_df = pd.DataFrame(columns=(('PPG_original', 'PPG_filtered')))
 ppg_df['PPG_original'] = ppg_data
 ppg_df['PPG_filtered'] = ppg_filtered
@@ -81,15 +102,6 @@ figECG.show()
 
 '''
 
-
-################################################################################################################################################################################
-
-
-## Clean data: make every beat only have one PPG/BP peak
-
-#### Find ECG R-peaks
-
-ecgpeaks, _ = signal.find_peaks(ecg_filtered, distance=sampling_rate//2.5)
 
 
 '''
@@ -113,20 +125,6 @@ plt.show()
 '''
 
 
-#### Make sure onle one PPG peak and one BP peak between two adjacent ECG R-peaks
-
-cleaned_df = pd.DataFrame()
-sum_beats = 0
-times_recorder = []
-
-for R_peak_number in range(len(ecgpeaks)-1):
-    sum_beats += 1
-    if ecg_filtered[ecgpeaks[R_peak_number]] > 0.4 and ecg_filtered[ecgpeaks[R_peak_number + 1]] > 0.4: # make sure the peaks are R-peak
-        onebeat_ppgpeak, _ = signal.find_peaks(ppg_filtered[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]], distance = sampling_rate//2.5)
-        onebeat_bppeak, _ = signal.find_peaks(bp_data[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]], distance = sampling_rate//2.5)
-        if len(onebeat_ppgpeak) == 1 and ppg_filtered[ecgpeaks[R_peak_number] + onebeat_ppgpeak] > 0 and len(onebeat_bppeak) == 1 : # make sure only one BP signal for one beat 
-            cleaned_df = pd.concat([cleaned_df, filtered_df[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]]])
-            times_recorder.append(sum_beats)
 
 
 '''
@@ -138,8 +136,7 @@ figcleaned = px.line(cleaned_df)
 figcleaned.show()
 
 '''
-#### Reset indexs:
-cleaned_df = cleaned_df.reset_index()
+
 
 '''
 #### Show final cleaned data:
@@ -153,8 +150,6 @@ figcleaned.show()
 
 #### Save acceptable cleaned data to Part_Cleaned_.cvs
 #### Warning!!!! NEVER FORGET to change the name of the csv!!!!!!!!!
-
-cleaned_df.to_csv('/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data/Part1_cleaned1.csv')
 
 
 ################################################################################################################################################################################
