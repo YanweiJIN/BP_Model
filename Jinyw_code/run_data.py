@@ -52,14 +52,18 @@ show_order = input('Please input "yes" to show the shape of data, or enter to sk
 all_data = open_data('/Users/jinyanwei/Desktop/BP_Model/Data/UCI/Part_1.mat', show_order)
 
 data_ready = pd.DataFrame()
-
+saved_number = []
 for patient_number in range(len(all_data)):
-    if len(all_data[patient_number]) > 3000 :
+    if len(all_data[patient_number]) > 18000 :  # 5min-300beats-18000sample at least
         clean_data(all_data[patient_number], patient_number)
         features_data("/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data", patient_number)
-        data_ready = pd.concat([data_ready, pd.read_csv(f'/Users/jinyanwei/Desktop/BP_Model/Model_record/features_data/Part1_feature{patient_number}.csv')])
+        features_file = f'/Users/jinyanwei/Desktop/BP_Model/Model_record/features_data/Part1_feature{patient_number}.csv'
+        if not os.path.exists(features_file):
+            continue       
+        data_ready = pd.concat([data_ready, pd.read_csv(features_file)])
+        saved_number.append(patient_number)
 
-data_ready.to_csv(f'/Users/jinyanwei/Desktop/BP_Model/Model_record/data_ready{len(data_ready)}.csv')
+data_ready.to_csv(f'/Users/jinyanwei/Desktop/BP_Model/Model_record/data_ready{len(saved_number)}.csv')
 
 random_forest_model(data_ready)  ## Can't split data to train and test, can't write right result.
 

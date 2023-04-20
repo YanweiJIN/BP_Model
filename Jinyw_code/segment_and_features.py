@@ -31,6 +31,9 @@ import warnings
 ################################################################################################################################################################################
 
 def features_data(file_path="/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data", number=9999999):
+    if not os.path.exists(f"{file_path}/Part1_cleaned{number}.csv"):
+        return
+           
     df = pd.read_csv(f"{file_path}/Part1_cleaned{number}.csv")
     ppg_data = df['PPG']
     bp_data = df['BP']

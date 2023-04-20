@@ -65,7 +65,7 @@ def clean_data(data, number):
 
     for R_peak_number in range(len(ecgpeaks)-1):
         sum_beats += 1
-        if ecg_filtered[ecgpeaks[R_peak_number]] > 0.4 and ecg_filtered[ecgpeaks[R_peak_number + 1]] > 0.4: # make sure the peaks are R-peak
+        if ecg_filtered[ecgpeaks[R_peak_number]] > 0.2 and ecg_filtered[ecgpeaks[R_peak_number + 1]] > 0.2: # make sure the peaks are R-peak
             onebeat_ppgpeak, _ = signal.find_peaks(ppg_filtered[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]], distance = sampling_rate//2.5)
             onebeat_bppeak, _ = signal.find_peaks(bp_data[ecgpeaks[R_peak_number]:ecgpeaks[R_peak_number + 1]], distance = sampling_rate//2.5)
             if len(onebeat_ppgpeak) == 1 and ppg_filtered[ecgpeaks[R_peak_number] + onebeat_ppgpeak] > 0 and len(onebeat_bppeak) == 1 : # make sure only one BP signal for one beat 
@@ -74,9 +74,13 @@ def clean_data(data, number):
     
     #### Reset indexs:
     cleaned_df = cleaned_df.reset_index()
-    
-    return cleaned_df.to_csv(f'/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data/Part1_cleaned{number}.csv')
 
+    if len(cleaned_df) > 18000:
+        return cleaned_df.to_csv(f'/Users/jinyanwei/Desktop/BP_Model/Model_record/cleaned_data/Part1_cleaned{number}.csv')
+    else:
+        return
+    
+    
     
 
 
@@ -135,10 +139,7 @@ display(cleaned_df)
 figcleaned = px.line(cleaned_df)
 figcleaned.show()
 
-'''
 
-
-'''
 #### Show final cleaned data:
 
 display(cleaned_df)
