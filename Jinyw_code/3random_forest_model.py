@@ -26,14 +26,19 @@ import warnings
 
 
 df = pd.read_csv('/Users/jinyanwei/Desktop/BP_Model/Model_record/features_data/Part1_feature0.csv')
-features_df = df.iloc[:, 1:-2]
-bp_df = df.iloc[:, -2:]
-
-X_scaled = features_df.values
-y = bp_df
 
 #### Split into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+X_train = df.iloc[:-100, 1:-2].values
+X_test = df.iloc[-100:, 1:-2].values
+y_train = df.iloc[:-100, -2:]
+y_test = df.iloc[-100:, -2:]
+
+
+'''
+#### Split into training and test sets randomly
+X_train, X_test, y_train, y_test = train_test_split(df.iloc[:, 1:-2].values, df.iloc[:, -2:], test_size=0.2, random_state=42)
+
+'''
 
 #### Initialize the random forest model
 model = RandomForestRegressor(n_estimators=100, random_state=42)
@@ -50,7 +55,7 @@ rmse_dbp = metrics.mean_squared_error(y_test["DBP"], y_pred[:, 1])**0.5
 mae_sbp = metrics.mean_absolute_error(y_test["SBP"], y_pred[:, 0])
 mae_dbp = metrics.mean_absolute_error(y_test["DBP"], y_pred[:, 1])
 
-print(len(bp_df), ' beats in total.')
+print(len(y_train), ' beats to train and ', len(y_test), ' beats to test.')
 print(f"Root mean squared error for SBP: {rmse_sbp:.3f}")
 print(f"Root mean squared error for DBP: {rmse_dbp:.3f}")
 print(f"Mean absolute error for SBP: {mae_sbp:.3f}")
