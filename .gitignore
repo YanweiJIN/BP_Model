@@ -1,3 +1,7 @@
 Z_just_for_try
 data
 Model_record
+*.ipynb
+*.csv
+*.h5
+*.png

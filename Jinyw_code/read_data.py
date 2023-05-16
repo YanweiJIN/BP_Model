@@ -24,26 +24,33 @@ import h5py
 
 #### Open big '.mat' data and check the shape:
 
-def open_data(file_path = '/Users/jinyanwei/Desktop/BP_Model/Data/UCI/Part_1.mat', show_order = 'yes'):
+def open_data(file_path = '/Users/jinyanwei/Desktop/BP_Model/Data/UCI/Part_1.mat'):
 
     with h5py.File(file_path, 'r') as file:
         references = np.array(file[list(file.keys())[1]]) #### Access a specific variable and convert it to a NumPy array
-        
+       
         # Dereference the objects and store them in a list
         data = []
         for ref in references.flat:
             dereferenced_object = np.array(file[ref])
             data.append(dereferenced_object)
 
+    '''    
     #### Show the shape of the data
-    if show_order == 'yes':
-        for i, array in enumerate(data):
-            print(f"Shape of data[{i}]: {array.shape}")
+    for i, array in enumerate(data):
+        print(f"Shape of data[{i}]: {array.shape}")
+    '''
     
     return data    
         
 
 
+################################################################################################################################################################################
+
+## Open data in small.mat
+'''
+import scipy.io as scio
+data = scio.loadmat("/Users/jinyanwei/Desktop/BP_Model/Data/UCI/Part_1.mat")'''
 
 
 ################################################################################################################################################################################

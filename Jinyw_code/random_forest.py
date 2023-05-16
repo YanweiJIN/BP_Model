@@ -25,7 +25,7 @@ import warnings
 
 ################################################################################################################################################################################
 
-def random_forest(df):
+def run_random_forest(df):
 
     X_scaled = df.iloc[:, 1:-2].values
     y_bp = df.iloc[:, -2:]
@@ -42,57 +42,66 @@ def random_forest(df):
     #### Predict on the test set
     y_pred = model.predict(X_test)
 
+    #### Get the result of BP
+    result_bp = pd.DataFrame(columns=['SBP_actu','SBP_pred','DBP_actu','DBP_pred'])
+    result_bp['SBP_actu'] = y_test['SBP']
+    result_bp['DBP_actu'] = y_test['DBP']
+    result_bp['SBP_pred'] = y_pred[:,0]
+    result_bp['DBP_pred'] = y_pred[:,1]
+    result_bp = result_bp.sort_index()
+
     #### Calculate root mean squared error and mean absolute error for both SBP and DBP
-    rmse_sbp = metrics.mean_squared_error(y_test["SBP"], y_pred[:, 0])**0.5
-    rmse_dbp = metrics.mean_squared_error(y_test["DBP"], y_pred[:, 1])**0.5
-    mae_sbp = metrics.mean_absolute_error(y_test["SBP"], y_pred[:, 0])
-    mae_dbp = metrics.mean_absolute_error(y_test["DBP"], y_pred[:, 1])
+    rmse_sbp = metrics.mean_squared_error(result_bp['SBP_actu'], result_bp['SBP_pred'])**0.5
+    rmse_dbp = metrics.mean_squared_error(result_bp['DBP_actu'], result_bp['DBP_pred'])**0.5
+    mae_sbp = metrics.mean_absolute_error(result_bp['SBP_actu'], result_bp['SBP_pred'])
+    mae_dbp = metrics.mean_absolute_error(result_bp['DBP_actu'], result_bp['DBP_pred'])
 
-    result = [
-                f'{len(y_train)} beats to train and {len(y_test)} beats to test.', 
-                f"Root mean squared error for SBP: {rmse_sbp:.3f}", 
-                f"Root mean squared error for DBP: {rmse_dbp:.3f}", 
-                f"Mean absolute error for SBP: {mae_sbp:.3f}", 
-                f"Mean absolute error for DBP: {mae_dbp:.3f}"
-            ]
+    print(f'{len(y_train)} beats to train and {len(y_test)} beats to test.', 
+      '\n'f"Root mean squared error for SBP: {rmse_sbp:.3f}", 
+      '\n'f"Root mean squared error for DBP: {rmse_dbp:.3f}", 
+      '\n'f"Mean absolute error for SBP: {mae_sbp:.3f}", 
+      '\n'f"Mean absolute error for DBP: {mae_dbp:.3f}"
+      )
     
-    file_handle = open('/Users/jinyanwei/Desktop/BP_Model/Model_record/random_forest_result.txt', mode='a')
-    file_handle.write(f'{result}')
-    file_handle.write('\n')
+    def write_record_totxt():
+      file_handle = open('/Users/jinyanwei/Desktop/BP_Model/Model_record/random_forest_result.txt', mode='a')
+      file_handle.write(f'{len(y_train)} beats to train and {len(y_test)} beats to test.')
+      file_handle.write('\n')
+      file_handle.write(f"Root mean squared error for SBP: {rmse_sbp:.3f}")
+      file_handle.write('\n')
+      file_handle.write(f"Root mean squared error for DBP: {rmse_dbp:.3f}")
+      file_handle.write('\n')
+      file_handle.write(f"Mean absolute error for SBP: {mae_sbp:.3f}")
+      file_handle.write('\n')
+      file_handle.write(f"Mean absolute error for DBP: {mae_dbp:.3f}")
+      file_handle.write('\n')
+      file_handle.write('\n')
+      return
 
-
-    #### gain BP result df
-
-    estimate_bp_df = pd.DataFrame()
-    estimate_bp_df['SBP_actu'] = y_test['SBP']
-    estimate_bp_df['SBP_pred'] = y_pred[:, 0]
-    estimate_bp_df['DBP_actu'] = y_test['DBP']
-    estimate_bp_df['DBP_pred'] = y_pred[:, 1]
-    estimate_bp_df.reset_index(drop=True)
-
+    write_record_totxt()
     #### Draw pictures
 
     plt.figure(figsize=(30, 15))
 
     plt.subplot(2, 1, 1)
-    x1 = np.array((range(len(estimate_bp_df))))
-    sbp1 = np.array(estimate_bp_df['SBP_pred'])
-    sbp2 = np.array(estimate_bp_df['SBP_actu'])
+    x1 = np.array((range(len(result_bp))))
+    sbp1 = np.array(result_bp['SBP_pred'])
+    sbp2 = np.array(result_bp['SBP_actu'])
     plt.plot(x1, sbp1, label='SBP_pred')
     plt.plot(x1, sbp2, label='SBP_actu')
     plt.title('SBP')
 
     plt.subplot(2, 1, 2)
-    x2 = np.array((range(len(estimate_bp_df))))
-    dbp1 = np.array(estimate_bp_df['DBP_pred'])
-    dbp2 = np.array(estimate_bp_df['DBP_actu'])
+    x2 = x1
+    dbp1 = np.array(result_bp['DBP_pred'])
+    dbp2 = np.array(result_bp['DBP_actu'])
     plt.plot(x2, dbp1, label='DBP_pred')
     plt.plot(x2, dbp2, label='DBP_actu')
     plt.title('DBP')
 
     plt.legend()
 
-    return result, plt.show()
+    return plt.show()
 
 
 

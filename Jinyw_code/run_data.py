@@ -45,11 +45,10 @@ sys.path.append('/Users/jinyanwei/Desktop/BP_Model/Jinyw_code/')
 from read_data import open_data
 from filter_and_clean_data import clean_data
 from segment_and_features import features_data
-from random_forest_model import random_forest_model
+from random_forest import run_random_forest
 
 #### Read all of data.
-show_order = input('Please input "yes" to show the shape of data, or enter to skip.')
-all_data = open_data('/Users/jinyanwei/Desktop/BP_Model/Data/UCI/Part_1.mat', show_order)
+all_data = open_data('/Users/jinyanwei/Desktop/BP_Model/Data/UCI/Part_1.mat')
 
 data_ready = pd.DataFrame()
 saved_number = []
@@ -65,7 +64,7 @@ for patient_number in range(len(all_data)):
 
 data_ready.to_csv(f'/Users/jinyanwei/Desktop/BP_Model/Model_record/data_ready{len(saved_number)}.csv')
 
-random_forest_model(data_ready)  ## Can't split data to train and test, can't write right result.
+run_random_forest(data_ready)  ## Can't split data to train and test, can't write right result.
 
 
 
